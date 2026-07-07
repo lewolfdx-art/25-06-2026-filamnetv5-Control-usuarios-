@@ -9,7 +9,6 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-
 class UsersTable
 {
     public static function configure(Table $table): Table
@@ -31,6 +30,7 @@ class UsersTable
                         'super_admin' => 'success',
                         'Editor' => 'warning',
                         'Author' => 'info',
+                        'Vendedor' => 'primary', // 🔥 AGREGADO
                         default => 'gray',
                     })
                     ->formatStateUsing(fn ($state) => str($state)->replace('_', ' ')->title())

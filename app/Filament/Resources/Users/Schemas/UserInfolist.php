@@ -21,7 +21,15 @@ class UserInfolist
                             str($record->getRoleNames()->first() ?? 'User')
                                 ->replace('_', ' ')
                                 ->title()
-                    ),
+                    )
+                    ->badge()
+                    ->color(fn ($state) => match ($state) {
+                        'Super Admin' => 'success',
+                        'Editor' => 'warning',
+                        'Author' => 'info',
+                        'Vendedor' => 'primary',
+                        default => 'gray',
+                    }),
 
                 TextEntry::make('email')
                     ->label('Email address'),
