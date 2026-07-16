@@ -1,4 +1,5 @@
 <?php
+// app/Filament/Resources/Users/Tables/UsersTable.php
 
 namespace App\Filament\Resources\Users\Tables;
 
@@ -27,10 +28,12 @@ class UsersTable
                     ->getStateUsing(fn ($record) => $record->getRoleNames()->first() ?? 'User')
                     ->badge()
                     ->color(fn ($state) => match ($state) {
-                        'super_admin' => 'success',
-                        'Editor' => 'warning',
-                        'Author' => 'info',
-                        'Vendedor' => 'primary', // 🔥 AGREGADO
+                        // 🔥 NOMBRES EXACTOS DE LA BASE DE DATOS (SIN strtolower)
+                        'super_admin' => 'cyan',        // 🔷 Cyan
+                        'Admin' => 'danger',            // 🔴 Rojo
+                        'Editor' => 'purple',           // 🟣 Morado
+                        'Author' => 'success',          // 🟢 Verde
+                        'Vendedor' => 'warning',        // 🟡 Amarillo
                         default => 'gray',
                     })
                     ->formatStateUsing(fn ($state) => str($state)->replace('_', ' ')->title())

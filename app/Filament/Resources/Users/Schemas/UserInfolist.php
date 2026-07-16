@@ -1,4 +1,5 @@
 <?php
+// app/Filament/Resources/Users/Schemas/UserInfolist.php
 
 namespace App\Filament\Resources\Users\Schemas;
 
@@ -24,10 +25,12 @@ class UserInfolist
                     )
                     ->badge()
                     ->color(fn ($state) => match ($state) {
-                        'Super Admin' => 'success',
-                        'Editor' => 'warning',
-                        'Author' => 'info',
-                        'Vendedor' => 'primary',
+                        // 🔥 NOMBRES EXACTOS (SIN strtolower)
+                        'super_admin' => 'cyan',
+                        'Admin' => 'danger',        // 🔴 Rojo
+                        'Editor' => 'purple',       // 🟣 Morado
+                        'Author' => 'success',      // 🟢 Verde
+                        'Vendedor' => 'warning',    // 🟡 Amarillo
                         default => 'gray',
                     }),
 

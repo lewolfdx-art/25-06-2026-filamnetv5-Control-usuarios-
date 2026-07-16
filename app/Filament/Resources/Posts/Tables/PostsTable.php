@@ -1,14 +1,16 @@
 <?php
+// app/Filament/Resources/Posts/Tables/PostsTable.php
 
 namespace App\Filament\Resources\Posts\Tables;
 
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Actions\DeleteAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn; // 🔥 NUEVO
 use Filament\Tables\Table;
 
 class PostsTable
@@ -17,6 +19,14 @@ class PostsTable
     {
         return $table
             ->columns([
+                // 🔥 MINIATURA DE LA IMAGEN (SIN borderRadius)
+                ImageColumn::make('featured_image')
+                    ->label('Imagen')
+                    ->height(40)
+                    ->width(60)
+                    ->toggleable()
+                    ->rounded(), // 🔥 USAR rounded() EN VEZ DE borderRadius
+
                 TextColumn::make('author.name')
                     ->label('Autor')
                     ->sortable()
@@ -37,6 +47,18 @@ class PostsTable
                 TextColumn::make('title')
                     ->label('Título')
                     ->searchable(),
+
+                TextColumn::make('categories.name')
+                    ->label('Categorías')
+                    ->badge()
+                    ->color('info')
+                    ->toggleable(),
+
+                TextColumn::make('tags.name')
+                    ->label('Etiquetas')
+                    ->badge()
+                    ->color('success')
+                    ->toggleable(),
 
                 IconColumn::make('is_published')
                     ->label('Publicado')
