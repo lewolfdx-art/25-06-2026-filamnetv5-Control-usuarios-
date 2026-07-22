@@ -8,6 +8,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class EditProduct extends EditRecord
 {
@@ -15,7 +16,13 @@ class EditProduct extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        // 🔥 GENERAR SLUG AUTOMÁTICAMENTE SI EL NOMBRE CAMBIÓ
+        if (isset($data['name']) && $data['name'] !== $this->record->name) {
+            $data['slug'] = Str::slug($data['name']);
+        }
+
         $data['updated_by'] = Auth::id();
+
         return $data;
     }
 

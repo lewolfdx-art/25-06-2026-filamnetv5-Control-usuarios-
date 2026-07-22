@@ -27,13 +27,17 @@ class ProductForm
                     ->maxLength(255)
                     ->live(onBlur: true)
                     ->afterStateUpdated(function ($state, callable $set) {
+                        // Generar slug automáticamente cuando se escribe el nombre
                         $set('slug', Str::slug($state));
                     }),
 
+                // Slug con opción a editar manualmente si se desea
                 TextInput::make('slug')
+                    ->label('Slug / URL Amigable')
                     ->required()
                     ->maxLength(255)
-                    ->unique(ignoreRecord: true),
+                    ->unique(ignoreRecord: true)
+                    ->helperText('Se genera automáticamente. Puedes editarlo si lo deseas.'),
 
                 RichEditor::make('description')
                     ->label('Descripción Completa')

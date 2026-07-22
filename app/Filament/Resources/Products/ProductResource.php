@@ -1,5 +1,4 @@
 <?php
-// app/Filament/Resources/Products/ProductResource.php
 
 namespace App\Filament\Resources\Products;
 
@@ -34,21 +33,26 @@ class ProductResource extends Resource
         return 1;
     }
 
-    // 🔥 FORMULARIO SIMPLE - SIN SELECTS
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
+                // Información Básica
                 \Filament\Forms\Components\TextInput::make('name')
                     ->label('Nombre del Producto')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->live(debounce: 500)
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        $set('slug', \Illuminate\Support\Str::slug($state));
+                    }),
 
                 \Filament\Forms\Components\TextInput::make('slug')
-                    ->label('Slug')
+                    ->label('Slug / URL Amigable')
                     ->required()
                     ->maxLength(255)
-                    ->unique(ignoreRecord: true),
+                    ->unique(ignoreRecord: true)
+                    ->helperText('Se genera automáticamente mientras escribes el nombre.'),
 
                 \Filament\Forms\Components\RichEditor::make('description')
                     ->label('Descripción Completa')
@@ -59,6 +63,7 @@ class ProductResource extends Resource
                     ->maxLength(255)
                     ->rows(2),
 
+                // Precios y Stock
                 \Filament\Forms\Components\TextInput::make('price')
                     ->label('Precio')
                     ->required()
@@ -68,6 +73,12 @@ class ProductResource extends Resource
 
                 \Filament\Forms\Components\TextInput::make('compare_price')
                     ->label('Precio de Referencia')
+                    ->numeric()
+                    ->prefix('$')
+                    ->step(0.01),
+
+                \Filament\Forms\Components\TextInput::make('cost_price')
+                    ->label('Costo')
                     ->numeric()
                     ->prefix('$')
                     ->step(0.01),
@@ -84,6 +95,34 @@ class ProductResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->maxLength(50),
 
+                \Filament\Forms\Components\TextInput::make('barcode')
+                    ->label('Código de Barras')
+                    ->maxLength(50),
+
+                // Descuentos
+                \Filament\Forms\Components\Toggle::make('is_on_sale')
+                    ->label('En Oferta')
+                    ->live()
+                    ->default(false),
+
+                \Filament\Forms\Components\TextInput::make('discount_percentage')
+                    ->label('Porcentaje de Descuento')
+                    ->numeric()
+                    ->step(0.01)
+                    ->minValue(0)
+                    ->maxValue(100)
+                    ->suffix('%')
+                    ->hidden(fn ($get) => !$get('is_on_sale')),
+
+                \Filament\Forms\Components\DateTimePicker::make('discount_start')
+                    ->label('Inicio de Oferta')
+                    ->hidden(fn ($get) => !$get('is_on_sale')),
+
+                \Filament\Forms\Components\DateTimePicker::make('discount_end')
+                    ->label('Fin de Oferta')
+                    ->hidden(fn ($get) => !$get('is_on_sale')),
+
+                // Categorización
                 \Filament\Forms\Components\TextInput::make('category')
                     ->label('Categoría')
                     ->maxLength(100),
@@ -92,6 +131,34 @@ class ProductResource extends Resource
                     ->label('Marca')
                     ->maxLength(100),
 
+                \Filament\Forms\Components\TagsInput::make('tags')
+                    ->label('Etiquetas'),
+
+                // SEO
+                \Filament\Forms\Components\TextInput::make('meta_title')
+                    ->label('Meta Título')
+                    ->maxLength(60),
+
+                \Filament\Forms\Components\Textarea::make('meta_description')
+                    ->label('Meta Descripción')
+                    ->maxLength(160)
+                    ->rows(2),
+
+                \Filament\Forms\Components\TextInput::make('meta_keywords')
+                    ->label('Meta Palabras Clave')
+                    ->maxLength(255),
+
+                // Estado
+                \Filament\Forms\Components\Select::make('status')
+                    ->label('Estado')
+                    ->options([
+                        'draft' => 'Borrador',
+                        'published' => 'Publicado',
+                        'archived' => 'Archivado',
+                    ])
+                    ->default('draft')
+                    ->required(),
+
                 \Filament\Forms\Components\Toggle::make('is_active')
                     ->label('Activo')
                     ->default(true),
@@ -99,9 +166,6 @@ class ProductResource extends Resource
                 \Filament\Forms\Components\Toggle::make('is_featured')
                     ->label('Destacado')
                     ->default(false),
-
-                \Filament\Forms\Components\Hidden::make('status')
-                    ->default('draft'),
 
                 \Filament\Forms\Components\Hidden::make('user_id')
                     ->default(auth()->id()),

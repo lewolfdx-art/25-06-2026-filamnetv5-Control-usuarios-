@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Products\Pages;
 use App\Filament\Resources\Products\ProductResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class CreateProduct extends CreateRecord
 {
@@ -13,8 +14,11 @@ class CreateProduct extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        // 🔥 GENERAR SLUG AUTOMÁTICAMENTE
+        $data['slug'] = Str::slug($data['name']);
         $data['user_id'] = Auth::id();
         $data['created_by'] = Auth::id();
+
         return $data;
     }
 

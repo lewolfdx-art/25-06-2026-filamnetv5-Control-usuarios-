@@ -55,13 +55,18 @@ class Product extends Model
         'tags' => 'array',
     ];
 
-    // 🔥 RELACIÓN CON IMÁGENES
+    // 🔥 MUTATOR: GENERAR SLUG AUTOMÁTICAMENTE
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = $value;
+        $this->attributes['slug'] = Str::slug($value);
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class)->orderBy('order');
     }
 
-    // 🔥 RELACIÓN CON IMAGEN PRINCIPAL
     public function primaryImage()
     {
         return $this->hasOne(ProductImage::class)->where('is_primary', true);
@@ -82,7 +87,6 @@ class Product extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    // 🔥 SCOPES
     public function scopePublished($query)
     {
         return $query->where('status', 'published');
@@ -109,7 +113,6 @@ class Product extends Model
         return $query->where('stock', '<=', $threshold);
     }
 
-    // 🔥 ACCESSORS
     public function getFinalPriceAttribute(): float
     {
         if ($this->is_on_sale && $this->discount_percentage) {
@@ -124,12 +127,5 @@ class Product extends Model
             return (($this->price - $this->cost_price) / $this->price) * 100;
         }
         return null;
-    }
-
-    // 🔥 MUTATORS
-    public function setNameAttribute($value)
-    {
-        $this->attributes['name'] = $value;
-        $this->attributes['slug'] = Str::slug($value);
     }
 }

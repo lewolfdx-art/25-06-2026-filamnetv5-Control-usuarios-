@@ -1,5 +1,4 @@
 <?php
-// app/Filament/Resources/Products/Tables/ProductsTable.php
 
 namespace App\Filament\Resources\Products\Tables;
 
@@ -10,6 +9,7 @@ use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
@@ -54,11 +54,13 @@ class ProductsTable
                     ->color('info')
                     ->toggleable(),
 
-                IconColumn::make('is_active')
+                // Switch Activo/Inactivo
+                ToggleColumn::make('is_active')
                     ->label('Activo')
-                    ->boolean()
-                    ->trueColor('success')
-                    ->falseColor('danger')
+                    ->onColor('success')
+                    ->offColor('danger')
+                    ->onIcon('heroicon-o-check-circle')
+                    ->offIcon('heroicon-o-x-circle')
                     ->toggleable(),
 
                 TextColumn::make('status')
@@ -83,10 +85,7 @@ class ProductsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            // 🔥 FILTROS - SIN SELECTFILTER
             ->filters([
-                // SelectFilter::make('status') - ELIMINADO
-                // SelectFilter::make('category') - ELIMINADO
                 TernaryFilter::make('is_active')
                     ->label('Activo')
                     ->placeholder('Todos')
