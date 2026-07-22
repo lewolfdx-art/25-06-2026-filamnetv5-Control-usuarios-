@@ -24,14 +24,9 @@ class ProductInfolist
                     ->color('gray'),
 
                 TextEntry::make('description')
-                    ->label('Descripción Completa')
+                    ->label('Descripción')
                     ->html()
                     ->columnSpanFull(),
-
-                TextEntry::make('short_description')
-                    ->label('Descripción Corta')
-                    ->columnSpanFull()
-                    ->placeholder('Sin descripción corta'),
 
                 // Precios
                 TextEntry::make('price')
@@ -41,23 +36,11 @@ class ProductInfolist
                     ->weight('bold')
                     ->color('success'),
 
-                TextEntry::make('compare_price')
-                    ->label('Precio de Referencia')
-                    ->money('USD')
-                    ->color('gray')
-                    ->placeholder('Sin precio de referencia'),
-
-                TextEntry::make('cost_price')
-                    ->label('Costo')
-                    ->money('USD')
-                    ->color('gray')
-                    ->placeholder('Sin costo registrado'),
-
                 TextEntry::make('final_price')
                     ->label('Precio Final (con descuento)')
                     ->money('USD')
                     ->badge()
-                    ->badgeColor('warning')
+                    ->color('warning')  // 🔥 CAMBIADO badgeColor() por color()
                     ->hidden(fn ($record) => !$record?->is_on_sale),
 
                 // Stock
@@ -70,85 +53,6 @@ class ProductInfolist
                         default => 'success',
                     })
                     ->formatStateUsing(fn ($state) => $state . ' unidades'),
-
-                TextEntry::make('sku')
-                    ->label('SKU / Código Interno')
-                    ->copyable()
-                    ->badge()
-                    ->color('info')
-                    ->placeholder('Sin SKU asignado'),
-
-                TextEntry::make('barcode')
-                    ->label('Código de Barras')
-                    ->copyable()
-                    ->badge()
-                    ->color('gray')
-                    ->placeholder('Sin código de barras'),
-
-                // Descuentos
-                IconEntry::make('is_on_sale')
-                    ->label('En Oferta')
-                    ->boolean()
-                    ->trueIcon('heroicon-o-check-circle')
-                    ->falseIcon('heroicon-o-x-circle')
-                    ->trueColor('success')
-                    ->falseColor('gray'),
-
-                TextEntry::make('discount_percentage')
-                    ->label('Porcentaje de Descuento')
-                    ->suffix('%')
-                    ->badge()
-                    ->color('danger')
-                    ->hidden(fn ($record) => !$record?->is_on_sale)
-                    ->placeholder('Sin descuento'),
-
-                TextEntry::make('discount_start')
-                    ->label('Inicio de Oferta')
-                    ->dateTime()
-                    ->hidden(fn ($record) => !$record?->is_on_sale)
-                    ->placeholder('No iniciada'),
-
-                TextEntry::make('discount_end')
-                    ->label('Fin de Oferta')
-                    ->dateTime()
-                    ->hidden(fn ($record) => !$record?->is_on_sale)
-                    ->placeholder('Sin fecha de fin'),
-
-                // Categorización
-                TextEntry::make('category')
-                    ->label('Categoría')
-                    ->badge()
-                    ->color('info')
-                    ->placeholder('Sin categoría'),
-
-                TextEntry::make('brand')
-                    ->label('Marca')
-                    ->badge()
-                    ->color('primary')
-                    ->placeholder('Sin marca'),
-
-                TextEntry::make('tags')
-                    ->label('Etiquetas')
-                    ->badge()
-                    ->color('success')
-                    ->formatStateUsing(fn ($state) => is_array($state) ? implode(', ', $state) : $state)
-                    ->placeholder('Sin etiquetas'),
-
-                // SEO
-                TextEntry::make('meta_title')
-                    ->label('Meta Título')
-                    ->copyable()
-                    ->placeholder('Sin meta título'),
-
-                TextEntry::make('meta_description')
-                    ->label('Meta Descripción')
-                    ->copyable()
-                    ->placeholder('Sin meta descripción'),
-
-                TextEntry::make('meta_keywords')
-                    ->label('Meta Palabras Clave')
-                    ->copyable()
-                    ->placeholder('Sin meta palabras clave'),
 
                 // Estado
                 TextEntry::make('status')
@@ -166,6 +70,7 @@ class ProductInfolist
                         default => $state,
                     }),
 
+                // Activo
                 IconEntry::make('is_active')
                     ->label('Activo')
                     ->boolean()
@@ -174,12 +79,22 @@ class ProductInfolist
                     ->trueColor('success')
                     ->falseColor('danger'),
 
+                // Destacado
                 IconEntry::make('is_featured')
                     ->label('Destacado')
                     ->boolean()
                     ->trueIcon('heroicon-o-star')
                     ->falseIcon('heroicon-o-star')
                     ->trueColor('warning')
+                    ->falseColor('gray'),
+
+                // En Oferta
+                IconEntry::make('is_on_sale')
+                    ->label('En Oferta')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-tag')
+                    ->falseIcon('heroicon-o-tag')
+                    ->trueColor('success')
                     ->falseColor('gray'),
 
                 // Auditoría
@@ -195,12 +110,6 @@ class ProductInfolist
                     ->label('Última Actualización')
                     ->dateTime()
                     ->placeholder('-'),
-
-                TextEntry::make('deleted_at')
-                    ->label('Eliminado')
-                    ->dateTime()
-                    ->color('danger')
-                    ->visible(fn ($record) => $record?->deleted_at !== null),
             ]);
     }
 }

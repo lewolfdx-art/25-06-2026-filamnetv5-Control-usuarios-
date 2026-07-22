@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -20,35 +19,38 @@ class ProductForm
     {
         return $schema
             ->components([
-                // Información Básica
+                // ========================================
+                // 1. INFORMACIÓN BÁSICA
+                // ========================================
+
+                // Nombre del Producto
                 TextInput::make('name')
                     ->label('Nombre del Producto')
                     ->required()
                     ->maxLength(255)
-                    ->live(onBlur: true)
+                    ->live(debounce: 500)
                     ->afterStateUpdated(function ($state, callable $set) {
-                        // Generar slug automáticamente cuando se escribe el nombre
                         $set('slug', Str::slug($state));
                     }),
 
-                // Slug con opción a editar manualmente si se desea
+                // Slug / URL Amigable
                 TextInput::make('slug')
                     ->label('Slug / URL Amigable')
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true)
-                    ->helperText('Se genera automáticamente. Puedes editarlo si lo deseas.'),
+                    ->helperText('Se genera automáticamente mientras escribes el nombre.'),
 
+                // Descripción
                 RichEditor::make('description')
-                    ->label('Descripción Completa')
+                    ->label('Descripción')
                     ->columnSpanFull(),
 
-                Textarea::make('short_description')
-                    ->label('Descripción Corta')
-                    ->maxLength(255)
-                    ->rows(2),
+                // ========================================
+                // 2. PRECIO Y STOCK
+                // ========================================
 
-                // Precios y Stock
+                // Precio
                 TextInput::make('price')
                     ->label('Precio')
                     ->required()
@@ -56,20 +58,7 @@ class ProductForm
                     ->prefix('$')
                     ->step(0.01),
 
-                TextInput::make('compare_price')
-                    ->label('Precio de Referencia')
-                    ->numeric()
-                    ->prefix('$')
-                    ->step(0.01)
-                    ->helperText('Precio anterior para mostrar oferta'),
-
-                TextInput::make('cost_price')
-                    ->label('Costo')
-                    ->numeric()
-                    ->prefix('$')
-                    ->step(0.01)
-                    ->helperText('Para calcular ganancias'),
-
+                // Stock
                 TextInput::make('stock')
                     ->label('Stock')
                     ->required()
@@ -77,21 +66,20 @@ class ProductForm
                     ->default(0)
                     ->minValue(0),
 
-                TextInput::make('sku')
-                    ->label('SKU')
-                    ->unique(ignoreRecord: true)
-                    ->maxLength(50),
+                // ========================================
+                // 3. DESCUENTOS
+                // ========================================
 
-                TextInput::make('barcode')
-                    ->label('Código de Barras')
-                    ->maxLength(50),
-
-                // Descuentos
+                // En Oferta (Switch)
                 Toggle::make('is_on_sale')
                     ->label('En Oferta')
                     ->live()
-                    ->default(false),
+                    ->default(false)
+                    ->onColor('success')
+                    ->offColor('danger')
+                    ->helperText('Activa para aplicar un descuento al producto.'),
 
+                // Porcentaje de Descuento
                 TextInput::make('discount_percentage')
                     ->label('Porcentaje de Descuento')
                     ->numeric()
@@ -101,42 +89,48 @@ class ProductForm
                     ->suffix('%')
                     ->hidden(fn ($get) => !$get('is_on_sale')),
 
-                DateTimePicker::make('discount_start')
-                    ->label('Inicio de Oferta')
-                    ->hidden(fn ($get) => !$get('is_on_sale')),
+                // ========================================
+                // 4. GALERÍA DE IMÁGENES
+                // ========================================
 
-                DateTimePicker::make('discount_end')
-                    ->label('Fin de Oferta')
-                    ->hidden(fn ($get) => !$get('is_on_sale')),
+                Repeater::make('images')
+                    ->label('Galería de Imágenes')
+                    ->relationship('images')
+                    ->schema([
+                        FileUpload::make('path')
+                            ->label('Imagen')
+                            ->image()
+                            ->imageEditor()
+                            ->imageCropAspectRatio('1:1')
+                            ->imageResizeTargetWidth('800')
+                            ->imageResizeTargetHeight('800')
+                            ->directory('products')
+                            ->visibility('public')
+                            ->required()
+                            ->helperText('Formatos permitidos: JPG, PNG, WEBP.'),
+                        Toggle::make('is_primary')
+                            ->label('Imagen Principal')
+                            ->default(false)
+                            ->helperText('Marca esta imagen como la principal del producto.'),
+                    ])
+                    ->columnSpanFull()
+                    ->helperText('Sube imágenes para el producto. La primera será la principal.'),
 
-                // Categorización
-                TextInput::make('category')
-                    ->label('Categoría')
-                    ->maxLength(100),
+                // ========================================
+                // 5. DESTACADO
+                // ========================================
 
-                TextInput::make('brand')
-                    ->label('Marca')
-                    ->maxLength(100),
+                // Destacado (Switch)
+                Toggle::make('is_featured')
+                    ->label('Destacado')
+                    ->default(false)
+                    ->onColor('warning')
+                    ->offColor('gray')
+                    ->helperText('Los productos destacados aparecen en la sección principal.'),
 
-                TagsInput::make('tags')
-                    ->label('Etiquetas'),
-
-                // SEO
-                TextInput::make('meta_title')
-                    ->label('Meta Título')
-                    ->maxLength(60)
-                    ->helperText('Máximo 60 caracteres'),
-
-                Textarea::make('meta_description')
-                    ->label('Meta Descripción')
-                    ->maxLength(160)
-                    ->rows(2)
-                    ->helperText('Máximo 160 caracteres'),
-
-                TextInput::make('meta_keywords')
-                    ->label('Meta Palabras Clave')
-                    ->maxLength(255)
-                    ->helperText('Separadas por coma'),
+                // ========================================
+                // 6. ESTADO
+                // ========================================
 
                 // Estado
                 Select::make('status')
@@ -149,13 +143,17 @@ class ProductForm
                     ->default('draft')
                     ->required(),
 
+                // Activo (Switch)
                 Toggle::make('is_active')
                     ->label('Activo')
-                    ->default(true),
+                    ->default(true)
+                    ->onColor('success')
+                    ->offColor('danger')
+                    ->helperText('Desactiva para ocultar el producto temporalmente.'),
 
-                Toggle::make('is_featured')
-                    ->label('Destacado')
-                    ->default(false),
+                // ========================================
+                // 7. CAMPOS OCULTOS
+                // ========================================
 
                 Hidden::make('user_id')
                     ->default(Auth::id()),

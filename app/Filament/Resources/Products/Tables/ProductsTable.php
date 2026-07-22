@@ -3,13 +3,14 @@
 namespace App\Filament\Resources\Products\Tables;
 
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Actions\DeleteAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
@@ -19,6 +20,15 @@ class ProductsTable
     {
         return $table
             ->columns([
+                // ⭐ IMAGEN DEL PRODUCTO (miniatura)
+                ImageColumn::make('primaryImage.path')
+                    ->label('Imagen')
+                    ->height(50)
+                    ->width(50)
+                    ->square()
+                    ->toggleable()
+                    ->placeholder('Sin imagen'),
+
                 TextColumn::make('id')
                     ->label('ID')
                     ->sortable(),
@@ -30,11 +40,21 @@ class ProductsTable
                     ->limit(30)
                     ->weight('bold'),
 
+                // Precio original
                 TextColumn::make('price')
                     ->label('Precio')
                     ->money('USD')
                     ->sortable()
                     ->color('success'),
+
+                // Precio con descuento
+                TextColumn::make('final_price')
+                    ->label('Precio Final')
+                    ->money('USD')
+                    ->sortable()
+                    ->color(fn ($record) => $record?->is_on_sale ? 'warning' : 'gray')
+                    ->badge()
+                    ->toggleable(),
 
                 TextColumn::make('stock')
                     ->label('Stock')
@@ -61,6 +81,24 @@ class ProductsTable
                     ->offColor('danger')
                     ->onIcon('heroicon-o-check-circle')
                     ->offIcon('heroicon-o-x-circle')
+                    ->toggleable(),
+
+                // Switch Destacado
+                ToggleColumn::make('is_featured')
+                    ->label('Destacado')
+                    ->onColor('warning')
+                    ->offColor('gray')
+                    ->onIcon('heroicon-o-star')
+                    ->offIcon('heroicon-o-star')
+                    ->toggleable(),
+
+                // Switch En Oferta
+                ToggleColumn::make('is_on_sale')
+                    ->label('En Oferta')
+                    ->onColor('success')
+                    ->offColor('gray')
+                    ->onIcon('heroicon-o-tag')
+                    ->offIcon('heroicon-o-tag')
                     ->toggleable(),
 
                 TextColumn::make('status')
@@ -91,6 +129,18 @@ class ProductsTable
                     ->placeholder('Todos')
                     ->trueLabel('Activos')
                     ->falseLabel('Inactivos'),
+
+                TernaryFilter::make('is_featured')
+                    ->label('Destacados')
+                    ->placeholder('Todos')
+                    ->trueLabel('Destacados')
+                    ->falseLabel('No destacados'),
+
+                TernaryFilter::make('is_on_sale')
+                    ->label('En Oferta')
+                    ->placeholder('Todos')
+                    ->trueLabel('En oferta')
+                    ->falseLabel('Sin oferta'),
             ])
             ->recordActions([
                 ViewAction::make()
