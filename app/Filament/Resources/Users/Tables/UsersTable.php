@@ -7,7 +7,9 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class UsersTable
@@ -17,23 +19,40 @@ class UsersTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label('Nombre')
                     ->searchable(),
 
                 TextColumn::make('email')
                     ->label('Email address')
                     ->searchable(),
 
+                // 🔥 SWITCH EN LA TABLA CON PROTECCIÓN
+                ToggleColumn::make('is_active')
+                    ->label('Activo')
+                    ->onColor('success')
+                    ->offColor('danger')
+                    ->onIcon('heroicon-o-check-circle')
+                    ->offIcon('heroicon-o-x-circle')
+                    ->toggleable()
+                    ->disabled(fn ($record) => 
+                        $record->hasRole('super_admin') || // No desactivar Super Admin
+                        $record->id === auth()->id()      // No desactivarse a sí mismo
+                    )
+                    ->tooltip(fn ($record) => 
+                        $record->hasRole('super_admin') ? '🔒 No se puede desactivar un Super Admin' :
+                        ($record->id === auth()->id() ? '🔒 No puedes desactivarte a ti mismo' : 'Clic para cambiar estado')
+                    ),
+
                 TextColumn::make('role')
                     ->label('Role')
                     ->getStateUsing(fn ($record) => $record->getRoleNames()->first() ?? 'User')
                     ->badge()
                     ->color(fn ($state) => match ($state) {
-                        // 🔥 NOMBRES EXACTOS DE LA BASE DE DATOS (SIN strtolower)
-                        'super_admin' => 'cyan',        // 🔷 Cyan
-                        'Admin' => 'danger',            // 🔴 Rojo
-                        'Editor' => 'purple',           // 🟣 Morado
-                        'Author' => 'success',          // 🟢 Verde
-                        'Vendedor' => 'warning',        // 🟡 Amarillo
+                        'super_admin' => 'cyan',
+                        'Admin' => 'danger',
+                        'Editor' => 'purple',
+                        'Author' => 'success',
+                        'Vendedor' => 'warning',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn ($state) => str($state)->replace('_', ' ')->title())

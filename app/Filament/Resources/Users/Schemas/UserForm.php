@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle; // 🔥 IMPORTAR TOGGLE
 use Filament\Schemas\Schema;
 use Spatie\Permission\Models\Role;
 
@@ -28,7 +29,15 @@ class UserForm
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
 
-                // 3️⃣ ROL
+                // 🔥 3️⃣ SWITCH DE ACTIVACIÓN
+                Toggle::make('is_active')
+                    ->label('Usuario Activo')
+                    ->default(true)
+                    ->onColor('success')
+                    ->offColor('danger')
+                    ->helperText('Desactiva para deshabilitar temporalmente el usuario'),
+
+                // 4️⃣ ROL
                 Select::make('roles')
                     ->label('Roles')
                     ->multiple()
@@ -38,10 +47,9 @@ class UserForm
                         return Role::all()->pluck('name', 'id')->toArray();
                     })
                     ->relationship('roles', 'name')
-                    ->columnSpanFull()
-                    ->helperText('Selecciona uno o más roles para el usuario'),
+                    ->columnSpanFull(),
 
-                // 4️⃣ CONTRASEÑA (al final)
+                // 5️⃣ CONTRASEÑA
                 TextInput::make('password')
                     ->label('Contraseña')
                     ->password()

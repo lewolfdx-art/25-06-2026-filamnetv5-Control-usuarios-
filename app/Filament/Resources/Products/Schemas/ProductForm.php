@@ -1,11 +1,11 @@
 <?php
-// app/Filament/Resources/Products/Schemas/ProductForm.php
 
 namespace App\Filament\Resources\Products\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -134,9 +134,16 @@ class ProductForm
                     ->maxLength(255)
                     ->helperText('Separadas por coma'),
 
-                // 🔥 ESTADO - SIN SELECT
-                Hidden::make('status')
-                    ->default('draft'),
+                // Estado
+                Select::make('status')
+                    ->label('Estado')
+                    ->options([
+                        'draft' => 'Borrador',
+                        'published' => 'Publicado',
+                        'archived' => 'Archivado',
+                    ])
+                    ->default('draft')
+                    ->required(),
 
                 Toggle::make('is_active')
                     ->label('Activo')

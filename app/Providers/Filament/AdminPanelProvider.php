@@ -20,6 +20,14 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 
+// 🔥 IMPORTAR EL PLUGIN DE AUTENTICACIÓN
+use Caresome\FilamentAuthDesigner\AuthDesignerPlugin;
+use Caresome\FilamentAuthDesigner\Data\AuthPageConfig;
+use Caresome\FilamentAuthDesigner\Enums\MediaPosition;
+
+// 🔥 IMPORTAR EL MIDDLEWARE DE USUARIO ACTIVO
+use App\Http\Middleware\CheckUserActive;
+
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -34,17 +42,12 @@ class AdminPanelProvider extends PanelProvider
             // 🎨 COLORES PERSONALIZADOS
             // ============================================
             ->colors([
-                // 🔥 COLOR PRIMARIO (CYAN)
                 'primary' => Color::Cyan,
-                
-                // 🔥 COLORES SECUNDARIOS
                 'danger' => Color::Red,
                 'success' => Color::Green,
                 'warning' => Color::Yellow,
                 'info' => Color::Sky,
                 'gray' => Color::Gray,
-                
-                // 🔥 COLORES EXTRA (PARA ROLES)
                 'purple' => Color::Purple,
                 'orange' => Color::Orange,
                 'pink' => Color::Pink,
@@ -65,30 +68,7 @@ class AdminPanelProvider extends PanelProvider
             // 🏷️ PERSONALIZACIÓN DE MARCA
             // ============================================
             ->brandName('Mi Sistema Web')
-            
-            // 🔥 LOGO (descomenta cuando tengas la imagen)
-            // ->brandLogo(asset('images/logo.svg'))
-            // ->brandLogoHeight('2rem')
-            
-            // 🔥 LOGO PARA MODO OSCURO
-            // ->darkModeBrandLogo(asset('images/logo-dark.svg'))
-            
-            // 🔥 FAVICON
-            // ->favicon(asset('images/favicon.ico'))
-            
-            // ============================================
-            // 🔤 FUENTE PERSONALIZADA
-            // ============================================
             ->font('Poppins')
-            
-            // ============================================
-            // 🌓 MODO OSCURO
-            // ============================================
-            // 🔥 Deshabilitar modo oscuro
-            // ->darkMode(false)
-            
-            // 🔥 O forzar modo claro por defecto
-            // ->defaultThemeMode(\Filament\Enums\ThemeMode::Light)
             
             // ============================================
             // 📁 RECURSOS, PÁGINAS Y WIDGETS
@@ -105,11 +85,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             
             // ============================================
-            // 🎨 TEMA PERSONALIZADO (cuando lo crees)
-            // ============================================
-            // ->viteTheme('resources/css/filament/admin/theme.css')
-            
-            // ============================================
             // 🛡️ MIDDLEWARE
             // ============================================
             ->middleware([
@@ -122,6 +97,8 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                // 🔥 MIDDLEWARE PARA VERIFICAR USUARIOS ACTIVOS
+                CheckUserActive::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
@@ -131,7 +108,16 @@ class AdminPanelProvider extends PanelProvider
             // 🔌 PLUGINS
             // ============================================
             ->plugins([
-                FilamentShieldPlugin::make()
+                FilamentShieldPlugin::make(),
+                
+                // 🔥 PLUGIN DE AUTENTICACIÓN PERSONALIZADA
+                AuthDesignerPlugin::make()
+                    ->login(fn (AuthPageConfig $config) => $config
+                        ->media(asset('images/moon.png'), alt: 'Bienvenido a Mi Sistema Web')
+                        ->mediaPosition(MediaPosition::Cover)
+                        // 🔥 ELIMINADO: ->blur(5) - IMAGEN NÍTIDA
+                    )
+                    ->themeToggle(bottom: '2rem', right: '2rem')
             ]);
     }
 }

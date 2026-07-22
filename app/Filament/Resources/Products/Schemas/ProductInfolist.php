@@ -1,5 +1,4 @@
 <?php
-// app/Filament/Resources/Products/Schemas/ProductInfolist.php
 
 namespace App\Filament\Resources\Products\Schemas;
 

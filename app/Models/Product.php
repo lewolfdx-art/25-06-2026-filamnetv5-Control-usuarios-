@@ -6,7 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Product extends Model
@@ -55,7 +55,18 @@ class Product extends Model
         'tags' => 'array',
     ];
 
-    // 🔥 RELACIONES CON TIPOS
+    // 🔥 RELACIÓN CON IMÁGENES
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('order');
+    }
+
+    // 🔥 RELACIÓN CON IMAGEN PRINCIPAL
+    public function primaryImage()
+    {
+        return $this->hasOne(ProductImage::class)->where('is_primary', true);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -71,29 +82,29 @@ class Product extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    // 🔥 SCOPES CON TIPOS CORREGIDOS
-    public function scopePublished(Builder $query): Builder
+    // 🔥 SCOPES
+    public function scopePublished($query)
     {
         return $query->where('status', 'published');
     }
 
-    public function scopeActive(Builder $query): Builder
+    public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
-    public function scopeFeatured(Builder $query): Builder
+    public function scopeFeatured($query)
     {
         return $query->where('is_featured', true);
     }
 
-    public function scopeOnSale(Builder $query): Builder
+    public function scopeOnSale($query)
     {
         return $query->whereNotNull('discount_percentage')
                      ->where('discount_percentage', '>', 0);
     }
 
-    public function scopeLowStock(Builder $query, int $threshold = 10): Builder
+    public function scopeLowStock($query, $threshold = 10)
     {
         return $query->where('stock', '<=', $threshold);
     }
@@ -116,7 +127,7 @@ class Product extends Model
     }
 
     // 🔥 MUTATORS
-    public function setNameAttribute(string $value): void
+    public function setNameAttribute($value)
     {
         $this->attributes['name'] = $value;
         $this->attributes['slug'] = Str::slug($value);
